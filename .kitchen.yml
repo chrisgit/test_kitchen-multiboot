@@ -1,0 +1,31 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero 
+  require_chef_omnibus: latest # > 12.11 need the RFC 062 exit codes https://github.com/chef/chef-rfc/blob/master/rfc062-exit-status.md
+  retry_on_exit_code:
+    - 35 # 35 is the exit code signaling that the node is rebooting
+  max_retries: 1
+  client_rb:
+    exit_status: :enabled
+    client_fork: false
+
+verifier:
+  name: inspec
+
+platforms:
+- name: windows2012r2
+  driver:
+    box: opentable/win-2012r2-standard-amd64-nocm
+    gui: true
+
+suites:
+- name: default
+  run_list: 
+    - "recipe[multiboot]"
+  verifier:
+    inspec_tests:
+      - test/smoke/default  
+  attributes: { "default_attributes": {} }
